@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vietnamese Food Classifier - Modern UI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #51cf66;
+            --error: #ff6b6b;
+            --warning: #ffd93d;
+            --dark: #1a1a2e;
+            --light: #f8f9ff;
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        header h1 {
+            font-size: 3.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+            letter-spacing: 2px;
+            font-weight: 800;
+        }
+
+        header .subtitle {
+            font-size: 1.3em;
+            opacity: 0.95;
+            font-weight: 300;
+            margin-bottom: 5px;
+        }
+
+        header .version {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid transparent;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: var(--primary);
+            border-color: white;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: var(--shadow);
+            animation: slideUp 0.8s ease-out;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-5px);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 i {
+            font-size: 1.3em;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .upload-area {
+            border: 3px dashed var(--primary);
+            border-radius: 15px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--light);
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .upload-area:hover::before {
+            left: 100%;
+        }
+
+        .upload-area:hover {
+            border-color: var(--secondary);
+            background: #f0f2ff;
+            transform: translateY(-2px);
+        }
+
+        .upload-area.active {
+            border-color: var(--secondary);
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+        }
+
+        .upload-area p {
+            color: #333;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .upload-area small {
+            color: #999;
+            display: block;
+            font-size: 0.9em;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: var(--light);
+            transform: translateY(-2px);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9em;
+            width: auto;
+        }
+
+        /* Results Section */
+        .results-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-height: 350px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-preview.show {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideUp 0.5s ease-out;
+            text-align: center;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .result-label {
+            font-size: 0.95em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .main-prediction {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .confidence-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .confidence-bar {
+            background: rgba(255, 255, 255, 0.3);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .confidence-fill {
+            background: white;
+            height: 100%;
+            transition: width 0.8s ease-out;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .top-predictions {
+            background: var(--light);
+            padding: 25px;
+            border-radius: 15px;
+            display: none;
+            border-left: 4px solid var(--primary);
+        }
+
+        .top-predictions.show {
+            display: block;
+            animation: slideUp 0.5s ease-out 0.2s backwards;
+        }
+
+        .top-predictions h4 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .prediction-item:hover {
+            background: white;
+            padding: 12px;
+            margin: 0 -12px;
+            border-radius: 8px;
+        }
+
+        .prediction-item:last-child {
+            border-bottom: none;
+        }
+
+        .prediction-rank {
+            background: var(--primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+
+        .prediction-name {
+            color: #333;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .prediction-confidence {
+            color: var(--secondary);
+            font-weight: bold;
+            font-size: 1.1em;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        /* Gallery Section */
+        .gallery-section {
+            grid-column: 1 / -1;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .gallery-item {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .gallery-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            color: white;
+            padding: 10px;
+            font-size: 0.9em;
+            font-weight: 600;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover .gallery-label {
+            transform: translateY(0);
+        }
+
+        /* Status Messages */
+        .message {
+            padding: 16px;
+            border-radius: 10px;
+            display: none;
+            margin-bottom: 15px;
+            animation: slideDown 0.4s ease-out;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .message.show {
+            display: flex;
+        }
+
+        .error-message {
+            background: #ffe0e0;
+            color: var(--error);
+            border-left: 4px solid var(--error);
+        }
+
+        .success-message {
+            background: #e0f8e0;
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+
+        .warning-message {
+            background: #fff8e0;
+            color: #ff9800;
+            border-left: 4px solid #ff9800;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: none;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+
+        .spinner.show {
+            display: block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(3px);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, var(--light), white);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box strong {
+            color: var(--primary);
+        }
+
+        /* Tabs Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Statistics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border-top: 3px solid var(--primary);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            color: white;
+            padding: 30px 0;
+            margin-top: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.95em;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .gallery-section {
+                grid-column: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.2em;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .main-layout {
+                gap: 20px;
+            }
+
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                max-height: 400px;
+            }
+
+            .nav-tabs {
+                gap: 8px;
+            }
+
+            .nav-tab {
+                padding: 10px 16px;
+                font-size: 0.9em;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1><i class="fas fa-utensils"></i> Vietnamese Food Classifier</h1>
+            <p class="subtitle">Advanced AI-Powered Image Recognition</p>
+            <p class="version">Powered by ResNet50 Deep Learning Model</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="classifier">
+                <i class="fas fa-image"></i> Classify
+            </button>
+            <button class="nav-tab" data-tab="gallery">
+                <i class="fas fa-th"></i> Gallery
+            </button>
+            <button class="nav-tab" data-tab="about">
+                <i class="fas fa-info-circle"></i> About
+            </button>
+        </div>
+
+        <!-- Classifier Tab -->
+        <div id="classifier-tab" class="tab-content active">
+            <div class="main-layout">
+                <!-- Upload Section -->
+                <div class="card upload-section">
+                    <h2><i class="fas fa-cloud-upload-alt"></i> Upload Image</h2>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📸</div>
+                        <p><strong>Click to upload or drag & drop</strong></p>
+                        <small>Supports JPG, PNG, WebP (Max 16MB)</small>
+                    </div>
+
+                    <input type="file" id="fileInput" accept="image/*">
+
+                    <div class="error-message" id="errorMsg">
+                        <span id="errorText"></span>
+                    </div>
+                    <div class="success-message" id="successMsg">
+                        <span id="successText"></span>
+                    </div>
+
+                    <button class="btn btn-primary" id="predictBtn" disabled>
+                        <i class="fas fa-magic"></i> Analyze Image
+                    </button>
+
+                    <button class="btn btn-secondary" id="clearBtn" style="display: none;">
+                        <i class="fas fa-redo"></i> Clear
+                    </button>
+
+                    <div class="spinner" id="spinner"></div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="card results-section">
+                    <h2><i class="fas fa-chart-bar"></i> Results</h2>
+
+                    <img id="previewImage" class="image-preview" alt="Uploaded image">
+
+                    <div class="result-box" id="resultBox">
+                        <div class="result-label">🎯 Predicted Food</div>
+                        <div class="main-prediction" id="mainPrediction">—</div>
+                    </div>
+
+                    <div class="top-predictions" id="topPredictions">
+                        <h4><i class="fas fa-list-ol"></i> Top 3 Predictions</h4>
+                        <div id="predictionsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gallery Tab -->
+        <div id="gallery-tab" class="tab-content">
+            <div class="card gallery-section">
+                <h2><i class="fas fa-images"></i> Food Categories</h2>
+                <p style="color: #666; margin-bottom: 20px; font-size: 1.05em;">
+                    <i class="fas fa-click"></i> Click on any category to view example images
+                </p>
+                <div class="gallery-grid" id="galleryGrid"></div>
+            </div>
+        </div>
+
+        <!-- About Tab -->
+        <div id="about-tab" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-lightbulb"></i> About This Model</h2>
+
+                <div class="info-box">
+                    <strong>🏆 Model Architecture:</strong> ResNet50 with Transfer Learning
+                </div>
+
+                <div class="info-box">
+                    <strong>📊 Dataset:</strong> 15 Vietnamese food categories with 1000+ images per class
+                </div>
+
+                <div class="info-box">
+                    <strong>🎓 Training Method:</strong> Fine-tuning on pre-trained ImageNet weights
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">15</div>
+                        <div class="stat-label">Food Categories</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">15K+</div>
+                        <div class="stat-label">Training Images</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">80-20</div>
+                        <div class="stat-label">Train/Val Split</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">224x224</div>
+                        <div class="stat-label">Input Resolution</div>
+                    </div>
+                </div>
+
+                <h3 style="color: var(--primary); margin-top: 30px; margin-bottom: 15px;">Food Categories</h3>
+                <div id="categoriesList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>🍜 <strong>Vietnamese Food Classifier</strong> | Powered by AI & Deep Learning | 2024</p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const predictBtn = document.getElementById('predictBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const previewImage = document.getElementById('previewImage');
+        const resultBox = document.getElementById('resultBox');
+        const topPredictions = document.getElementById('topPredictions');
+        const predictionsList = document.getElementById('predictionsList');
+        let mainPrediction = document.getElementById('mainPrediction');
+        const spinner = document.getElementById('spinner');
+        const errorMsg = document.getElementById('errorMsg');
+        const successMsg = document.getElementById('successMsg');
+        const errorText = document.getElementById('errorText');
+        const successText = document.getElementById('successText');
+        const galleryGrid = document.getElementById('galleryGrid');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const categoriesList = document.getElementById('categoriesList');
+        const navTabs = document.querySelectorAll('.nav-tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Food classes from backend
+        const foodClasses = {{ class_names | tojson }};
+
+        // Tab Navigation
+        navTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.getAttribute('data-tab');
+                
+                navTabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tabName + '-tab').classList.add('active');
+            });
+        });
+
+        // Upload Area Event Listeners
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('active');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('active');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('active');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        // File Selection Handler
+        function handleFileSelect(file) {
+            if (!file.type.startsWith('image/')) {
+                showError('Please select a valid image file');
+                return;
+            }
+
+            if (file.size > 16 * 1024 * 1024) {
+                showError('File size exceeds 16MB limit');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewImage.classList.add('show');
+            };
+            reader.readAsDataURL(file);
+
+            predictBtn.disabled = false;
+            clearBtn.style.display = 'block';
+            clearMessages();
+            clearResults();
+        }
+
+        // Check model status
+        async function checkModelStatus() {
+            try {
+                const response = await fetch('/api/status');
+                if (response.ok) {
+                    const status = await response.json();
+                    if (!status.model_loaded) {
+                        predictBtn.disabled = true;
+                        predictBtn.title = status.model_error || 'Model is loading...';
+                        if (status.model_error) {
+                            showError(`Model Error: ${status.model_error}`);
+                        }
+                    } else {
+                        predictBtn.disabled = false;
+                        predictBtn.title = 'Click to make prediction';
+                    }
+                    return status;
+                }
+            } catch (error) {
+                console.warn('Error checking model status:', error);
+            }
+            return null;
+        }
+
+        // Prediction Handler
+        predictBtn.addEventListener('click', async () => {
+            // Check model status before prediction
+            const status = await checkModelStatus();
+            if (status && !status.model_loaded) {
+                showError('Model is not ready. Please wait for it to load.');
+                return;
+            }
+
+            if (!fileInput.files.length) {
+                showError('Please select an image first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                showLoading(true);
+                clearMessages();
+
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Prediction failed');
+                }
+
+                const results = await response.json();
+                displayResults(results);
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Clear Handler
+        clearBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            previewImage.src = '';
+            previewImage.classList.remove('show');
+            resultBox.classList.remove('show');
+            topPredictions.classList.remove('show');
+            predictBtn.disabled = true;
+            clearBtn.style.display = 'none';
+            clearMessages();
+            clearResults();
+            uploadArea.classList.remove('active');
+        });
+
+        // Display Results
+        function displayResults(results) {
+            if (results.error) {
+                showError(results.error);
+                return;
+            }
+
+            // Handle "not in database" case
+            if (results.not_in_database) {
+                // Reset result box to default state first
+                resultBox.innerHTML = `
+                    <div class="result-label">🎯 Predicted Food</div>
+                    <div class="main-prediction" id="mainPrediction">—</div>
+                    <div class="confidence-info">
+                        <span>Confidence Score</span>
+                        <strong id="confidenceText">0%</strong>
+                    </div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="confidenceFill"></div>
+                    </div>
+                `;
+                
+                // Then update with warning style
+                resultBox.innerHTML = `
+                    <div style="text-align: center; padding: 30px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); border-radius: 15px; color: white;">
+                        <div style="font-size: 3em; margin-bottom: 15px;">⚠️</div>
+                        <h2 style="margin-bottom: 15px; color: white;">Not in Database</h2>
+                        <p style="font-size: 1.1em; margin-bottom: 20px; color: rgba(255,255,255,0.95);">
+                            ${results.message}
+                        </p>
+                    </div>
+                `;
+                
+                // Hide top predictions for "not in database" case
+                topPredictions.classList.remove('show');
+                resultBox.classList.add('show');
+                return;
+            }
+
+            // Reset the result box to normal state (remove any warning styling)
+            resultBox.innerHTML = `
+                <div class="result-label">🎯 Predicted Food</div>
+                <div class="main-prediction" id="mainPrediction">—</div>
+            `;
+            
+            // Re-cache the elements since we just recreated them
+            mainPrediction = document.getElementById('mainPrediction');
+
+            mainPrediction.textContent = results.predicted_class;
+
+            resultBox.classList.add('show');
+
+            // Hide top predictions for valid results
+            topPredictions.classList.remove('show');
+        }
+
+        // Message Handlers
+        function showError(message) {
+            errorText.textContent = message;
+            errorMsg.classList.add('show');
+            setTimeout(() => errorMsg.classList.remove('show'), 5000);
+        }
+
+        function showSuccess(message) {
+            successText.textContent = message;
+            successMsg.classList.add('show');
+            setTimeout(() => successMsg.classList.remove('show'), 4000);
+        }
+
+        function clearMessages() {
+            errorMsg.classList.remove('show');
+            successMsg.classList.remove('show');
+        }
+
+        function clearResults() {
+            resultBox.classList.remove('show');
+            topPredictions.classList.remove('show');
+        }
+
+        function showLoading(show) {
+            spinner.classList.toggle('show', show);
+            loadingOverlay.classList.toggle('show', show);
+        }
+
+        // Load Gallery
+        function loadGallery() {
+            galleryGrid.innerHTML = '';
+            foodClasses.forEach((foodClass) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.innerHTML = `
+                    <img src="" alt="${foodClass}" style="background: #f0f0f0;">
+                    <div class="gallery-label">${foodClass}</div>
+                `;
+                item.addEventListener('click', () => loadExample(foodClass, item.querySelector('img')));
+                galleryGrid.appendChild(item);
+
+                loadExample(foodClass, item.querySelector('img'));
+            });
+        }
+
+        async function loadExample(foodClass, imgElement) {
+            try {
+                const response = await fetch(`/api/example/${foodClass}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    imgElement.src = data.image_base64;
+                    imgElement.style.background = 'transparent';
+                } else {
+                    imgElement.style.background = '#ddd';
+                }
+            } catch (error) {
+                console.error('Error loading example:', error);
+            }
+        }
+
+        // Load Categories List
+        function loadCategories() {
+            categoriesList.innerHTML = '';
+            foodClasses.forEach((foodClass) => {
+                const item = document.createElement('div');
+                item.style.cssText = `
+                    background: var(--light);
+                    padding: 12px;
+                    border-radius: 8px;
+                    border-left: 3px solid var(--primary);
+                    font-weight: 500;
+                    color: #333;
+                `;
+                item.textContent = '🍲 ' + foodClass;
+                categoriesList.appendChild(item);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGallery();
+            loadCategories();
+            
+            // Check model status on page load
+            checkModelStatus();
+            
+            // Check model status periodically (every 3 seconds) while model is loading
+            const statusCheckInterval = setInterval(async () => {
+                const status = await checkModelStatus();
+                if (status && status.model_loaded) {
+                    clearInterval(statusCheckInterval);
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
